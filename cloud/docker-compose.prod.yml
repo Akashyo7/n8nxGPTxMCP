@@ -1,0 +1,57 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - ACME_AGREE=true
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  n8n:
+    image: n8nio/n8n:1.73.1
+    restart: unless-stopped
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-UTC}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=443
+      - N8N_LISTEN_ADDRESS=0.0.0.0
+      - WEBHOOK_URL=https://${N8N_HOST}/
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ../local-files:/files
+
+  tools:
+    build:
+      context: ..
+      dockerfile: fastmcp_server/Dockerfile
+    restart: unless-stopped
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - N8N_URL=https://$N8N_HOST
+      - N8N_API_KEY=${N8N_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+    depends_on:
+      - n8n
+      - qdrant
+
+volumes:
+  n8n_data:
+  qdrant_data:
+  caddy_data:
+  caddy_config:

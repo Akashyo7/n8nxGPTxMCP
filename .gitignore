@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+.venv/
+venv/
+.env
+.env.*
+
+# Node
+node_modules/
+
+# Editor
+.vscode/
+.idea/
+
+# Mac
+.DS_Store
+
+# Docker
+logs/
+
+# n8n
+n8n_data/
+
+# Local files
+local-files/

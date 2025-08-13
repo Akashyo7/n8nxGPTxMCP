@@ -1,0 +1,108 @@
+{
+  "name": "Trends: RSS → Qdrant",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        }
+      },
+      "id": "Cron_1",
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        220,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "url": [
+          "https://hnrss.org/frontpage"
+        ]
+      },
+      "id": "RSS_1",
+      "name": "RSS Read",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [
+        460,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "Split_1",
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        700,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8000/tool/rag/upsert",
+        "options": {},
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ \n  \"text\": $json.contentSnippet || $json.content || $json.title,\n  \"source\": $json.link,\n  \"metadata\": { \n    \"title\": $json.title \n  }\n}"
+      },
+      "id": "HTTP_1",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        940,
+        280
+      ]
+    }
+  ],
+  "connections": {
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

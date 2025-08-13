@@ -1,0 +1,13 @@
+{
+	email you@example.com
+}
+
+${N8N_HOST} {
+	encode gzip
+	reverse_proxy n8n:5678
+}
+
+api.${N8N_HOST} {
+	encode gzip
+	reverse_proxy tools:8000
+}
