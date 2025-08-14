@@ -13,11 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # Install requirements
-COPY fastmcp_server/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
 # Copy app
 COPY . /app/fastmcp_server
 
 EXPOSE 8000
-CMD ["uvicorn", "fastmcp_server.server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "fastmcp_server.server:app", "--host", "0.0.0.0", "--port", "${PORT}"]
